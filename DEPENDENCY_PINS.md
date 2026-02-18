@@ -5,7 +5,7 @@ This document defines the known-good dependency set for the WeMo bridge stack.
 ## Current Baseline Pins
 | Component | Repo | Branch/Tag | Pinned SHA | Notes |
 |---|---|---|---|---|
-| Matter bridge | `jolie1204/wemo-matter-bridge` | `master` | `277119843ee92e7c10ad42650557411abcc5e260` | Includes docs/roadmap/howto and latest bridge fixes. |
+| Matter bridge | `jolie1204/wemo-matter-bridge` | `master` | `91aa7d545853cc6eaedd51df61caf22ed987d9f3` | Known-compatible with public openwemo APIs; stack script applies required build compatibility patches. |
 | WeMo core | `jolie1204/openwemo-bridge-core` | `main` | `4c173e6b15eb487dd75e4da62b2ec358b1677ce4` | Source of `wemo_ctrl` + `wemo_engine`. |
 | CHIP fork | `jolie1204/connectedhomeip` | `wemo-v1.5.0.1` | `8effa808dd9fa195ec0294f0ad67c80a86dd4975` | Stable baseline for bridge compatibility. |
 | UPNP SDK | `jolie1204/pupnp` | `main` | `1124f692772f673a0dc8d5371f50c0d334905b1c` | Used by WeMo LAN/UPNP layer. |

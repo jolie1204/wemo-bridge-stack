@@ -15,66 +15,87 @@ Keep legacy WeMo LAN devices usable through Matter with a local-first bridge arc
 - [`pupnp`](https://github.com/jolie1204/pupnp)
   - Portable UPNP SDK used by WeMo control components.
 
+## Reproducible Build (Recommended)
+Use the stack script to clone, pin, build, and apply known compatibility fixes.
 
-## Quick Start
-
-### 1) Clone sibling repos
 ```bash
-mkdir -p ~/wemo-stack && cd ~/wemo-stack
-git clone git@github.com:jolie1204/wemo-matter-bridge.git
-git clone git@github.com:jolie1204/openwemo-bridge-core.git
-git clone git@github.com:jolie1204/connectedhomeip.git
-git clone git@github.com:jolie1204/pupnp.git
+cd <path-to-this-repo>
+WORKSPACE="${WORKSPACE:-$HOME/wemo-stack}" ./scripts/reproduce_build.sh
 ```
 
-### 2) Check out pinned baselines
+The script:
+1. Clones/updates sibling repos under `$WORKSPACE`.
+2. Checks out pinned SHAs from `DEPENDENCY_PINS.md`.
+3. Builds `pupnp` from source (no dependency on `/usr/local` installation).
+4. Builds `openwemo-bridge-core` with `UPNP_BASE=$WORKSPACE/pupnp`.
+5. Applies the current `UpnpInit2` compatibility patch when needed.
+6. Builds `wemo-matter-bridge/matter-bridge-app`.
+
+## Manual Quick Start
+
+### 1) Define workspace
+```bash
+export WORKSPACE="${WORKSPACE:-$HOME/wemo-stack}"
+mkdir -p "$WORKSPACE"
+cd "$WORKSPACE"
+```
+
+### 2) Clone sibling repos
+```bash
+git clone https://github.com/jolie1204/wemo-matter-bridge.git
+git clone https://github.com/jolie1204/openwemo-bridge-core.git
+git clone https://github.com/jolie1204/connectedhomeip.git
+git clone https://github.com/jolie1204/pupnp.git
+```
+
+### 3) Check out pinned baselines
 Use SHAs/tags from [`DEPENDENCY_PINS.md`](./DEPENDENCY_PINS.md).
 
-### 3) Build in order
-1. `pupnp` (if needed by your environment)
-2. `openwemo-bridge-core` (`wemo_ctrl`, `wemo_engine`)
+### 4) Build in order
+1. `pupnp`
+2. `openwemo-bridge-core` (`wemo_ctrl`, `wemo_engine`) with `UPNP_BASE="$WORKSPACE/pupnp"`
 3. `wemo-matter-bridge/matter-bridge-app`
 
 Example for bridge app:
 ```bash
-cd ~/wemo-stack/wemo-matter-bridge/matter-bridge-app
+cd "$WORKSPACE/wemo-matter-bridge/matter-bridge-app"
 ./build_wemo_bridge.sh
 ```
 
-### 4) Deploy and start
-If your environment uses `bridge_stack.sh`:
+### 5) Deploy and start
+Preferred deployment helper:
 ```bash
-cd ~/wemo-stack
+cd "$WORKSPACE/wemo-matter-bridge"
+./scripts/install_bridge_stack.sh --workspace "$WORKSPACE"
+```
+
+If your environment already has `bridge_stack.sh`:
+```bash
+cd "$WORKSPACE"
 ./bin/bridge_stack.sh stop
 cp wemo-matter-bridge/matter-bridge-app/out/ethernet/wemo-bridge-app ./bin/wemo-bridge-app
 ./bin/bridge_stack.sh start
 ./bin/bridge_stack.sh status
 ```
 
-### 5) Verify
+### 6) Verify
 ```bash
-rg -n "WeMo bind|Added device|Device\[" ~/wemo-stack/var/log/wemo_bridge.log | tail -n 200
+rg -n "WeMo bind|Added device|Device\[" "$WORKSPACE/var/log/wemo_bridge.log" | tail -n 200
 ```
 
 Then commission the bridge in your Matter controller app (Google Home, etc.).
 
 ## Recommended Read Order
-1. `wemo-matter-bridge/docs/HOWTO.md`
-2. [`DEPENDENCY_PINS.md`](./DEPENDENCY_PINS.md)
-3. `wemo-matter-bridge/COMPATIBILITY.md`
-4. `wemo-matter-bridge/ROADMAP.md`
+1. `wemo-matter-bridge/docs/CODEX_SETUP.md`
+2. `wemo-matter-bridge/docs/HOWTO.md`
+3. [`DEPENDENCY_PINS.md`](./DEPENDENCY_PINS.md)
+4. `wemo-matter-bridge/COMPATIBILITY.md`
 
 ## Architecture At a Glance
 1. `wemo_ctrl` discovers and controls WeMo LAN devices via UPNP.
 2. `wemo-bridge-app` bridges those devices as Matter endpoints.
 3. Controller apps (Google Home, etc.) interact with Matter endpoints.
 4. State/events are exchanged locally between bridge app and `wemo_ctrl` over IPC.
-
-## Build and Deploy Order
-1. Build/install `pupnp` (if your environment does not already provide a compatible build).
-2. Build `openwemo-bridge-core` (`wemo_ctrl` and `wemo_engine`).
-3. Build `wemo-matter-bridge/matter-bridge-app` against pinned `connectedhomeip`.
-4. Deploy binaries and start stack with your runtime script.
 
 ## Upgrade Policy
 - Do not track bleeding edge by default.
