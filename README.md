@@ -10,6 +10,10 @@ Umbrella repository for the post-Belkin-support local WeMo migration stack.
 - [`connectedhomeip`](https://github.com/jolie1204/connectedhomeip)
   - Pinned fork used for bridge compatibility
 
+## Dependencies
+- [`pupnp`](https://github.com/jolie1204/pupnp)
+  - Portable UPnP SDK used by WeMo LAN control components
+
 ## Recommended Entry Point
 1. Read setup and operations guide in:
    - `wemo-matter-bridge/docs/HOWTO.md`
